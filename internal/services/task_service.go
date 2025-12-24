@@ -1,9 +1,11 @@
 package services
 
+import "sync"
+
 type TaskService struct {
-	_ int
+	data *sync.Map
 }
 
-func NewTaskService() *TaskService {
-	return &TaskService{}
+func NewTaskService(data *sync.Map) *TaskService {
+	return &TaskService{data: data}
 }

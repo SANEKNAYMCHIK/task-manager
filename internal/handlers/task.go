@@ -44,7 +44,14 @@ func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *TaskHandler) ListTask(w http.ResponseWriter, r *http.Request) {
-	return
+	tasks := t.taskService.List()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(tasks); err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (t *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {

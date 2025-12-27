@@ -51,6 +51,13 @@ func (s *TaskService) Get(id int) (*models.Task, error) {
 	return task, nil
 }
 
-func (s *TaskService) List() {
-	return
+func (s *TaskService) List() []*models.Task {
+	res := []*models.Task{}
+	s.data.Range(func(key, value any) bool {
+		if task, ok := value.(*models.Task); ok {
+			res = append(res, task)
+		}
+		return true
+	})
+	return res
 }

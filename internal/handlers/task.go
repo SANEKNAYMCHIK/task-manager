@@ -22,7 +22,7 @@ func NewTaskHandler(taskService *services.TaskService) *TaskHandler {
 func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	var req models.TaskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "title and description must be string, is_done must be bool", http.StatusBadRequest)
+		http.Error(w, "Title is required, title and description must be string, is_done must be bool", http.StatusBadRequest)
 		return
 	}
 	if req.Title == "" {
@@ -82,7 +82,7 @@ func (t *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}
 	var req models.TaskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "title and description must be string, is_done must be bool", http.StatusBadRequest)
+		http.Error(w, "Title is required, title and description must be string, is_done must be bool", http.StatusBadRequest)
 		return
 	}
 	if req.Title == "" {
@@ -105,7 +105,19 @@ func (t *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
-	return
+	id, err := getID(r.URL.Path)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	err = t.taskService.Delete(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func getID(path string) (int, error) {

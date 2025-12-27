@@ -62,8 +62,13 @@ func (s *TaskService) Update(id int, reqTask models.TaskRequest) (*models.Task, 
 	return resp, nil
 }
 
-func (s *TaskService) Delete() {
-	return
+func (s *TaskService) Delete(id int) error {
+	_, ok := s.data.Load(id)
+	if !ok {
+		return fmt.Errorf("Not Found")
+	}
+	s.data.Delete(id)
+	return nil
 }
 
 func (s *TaskService) Get(id int) (*models.Task, error) {

@@ -20,9 +20,9 @@ func NewTaskHandler(taskService *services.TaskService) *TaskHandler {
 }
 
 func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
-	var req models.CreateTaskRequest
+	var req models.TaskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Title and description are required", http.StatusBadRequest)
+		http.Error(w, "title and description must be string, is_done must be bool", http.StatusBadRequest)
 		return
 	}
 	if req.Title == "" {
@@ -32,7 +32,7 @@ func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	createdTask, err := t.taskService.Create(req)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -62,7 +62,7 @@ func (t *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	}
 	task, err := t.taskService.Get(id)
 	if err != nil {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -75,7 +75,33 @@ func (t *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
-	return
+	id, err := getID(r.URL.Path)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	var req models.TaskRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "title and description must be string, is_done must be bool", http.StatusBadRequest)
+		return
+	}
+	if req.Title == "" {
+		http.Error(w, "Title is required", http.StatusBadRequest)
+		return
+	}
+
+	task, err := t.taskService.Update(id, req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(task); err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (t *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {

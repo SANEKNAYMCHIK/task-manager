@@ -7,7 +7,8 @@ type Task struct {
 	IsDone      bool   `json:"is_done"`
 }
 
-type CreateTaskRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+type TaskRequest struct {
+	Title       string  `json:"title"`
+	Description *string `json:"description,omitempty"`
+	IsDone      *bool   `json:"is_done,omitempty"`
 }

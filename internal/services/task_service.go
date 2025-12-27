@@ -19,20 +19,47 @@ func NewTaskService(data *sync.Map) *TaskService {
 	}
 }
 
-func (s *TaskService) Create(reqTask models.CreateTaskRequest) (*models.Task, error) {
+func (s *TaskService) Create(reqTask models.TaskRequest) (*models.Task, error) {
+	var tempDescr string
+	if reqTask.Description != nil {
+		tempDescr = *reqTask.Description
+	}
+	var tempIsDone bool
+	if reqTask.IsDone != nil {
+		tempIsDone = *reqTask.IsDone
+	}
 	resp := &models.Task{
 		ID:          s.curID,
 		Title:       reqTask.Title,
-		Description: reqTask.Description,
-		IsDone:      false,
+		Description: tempDescr,
+		IsDone:      tempIsDone,
 	}
 	s.data.Store(s.curID, resp)
 	s.curID++
 	return resp, nil
 }
 
-func (s *TaskService) Update() {
-	return
+func (s *TaskService) Update(id int, reqTask models.TaskRequest) (*models.Task, error) {
+	curData, ok := s.data.Load(id)
+	if !ok {
+		return nil, fmt.Errorf("Not found")
+	}
+	tempDescr := curData.(*models.Task).Description
+	if reqTask.Description != nil {
+		tempDescr = *reqTask.Description
+	}
+	tempIsDone := curData.(*models.Task).IsDone
+	if reqTask.IsDone != nil {
+		tempIsDone = *reqTask.IsDone
+	}
+	resp := &models.Task{
+		ID:          id,
+		Title:       reqTask.Title,
+		Description: tempDescr,
+		IsDone:      tempIsDone,
+	}
+	s.data.Store(id, resp)
+	return resp, nil
 }
 
 func (s *TaskService) Delete() {

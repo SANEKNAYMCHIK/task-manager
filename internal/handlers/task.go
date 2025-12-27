@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/SANEKNAYMCHIK/task-manager/internal/models"
 	"github.com/SANEKNAYMCHIK/task-manager/internal/services"
@@ -17,11 +20,6 @@ func NewTaskHandler(taskService *services.TaskService) *TaskHandler {
 }
 
 func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var req models.CreateTaskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Title and description are required", http.StatusBadRequest)
@@ -50,7 +48,23 @@ func (t *TaskHandler) ListTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
-	return
+	id, err := getID(r.URL.Path)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	task, err := t.taskService.Get(id)
+	if err != nil {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(task); err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (t *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
@@ -59,4 +73,14 @@ func (t *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 func (t *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	return
+}
+
+func getID(path string) (int, error) {
+	path = strings.Trim(path, "/")
+	parts := strings.Split(path, "/")
+	id, err := strconv.Atoi(parts[1])
+	if (err != nil) || (id < 0) {
+		return 0, fmt.Errorf("Invalid ID")
+	}
+	return id, nil
 }

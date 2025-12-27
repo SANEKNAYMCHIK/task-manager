@@ -27,7 +27,7 @@ func NewRouter(taskService *services.TaskService) *http.ServeMux {
 		switch r.Method {
 		case http.MethodGet:
 			// GET Получить задачу по идентификатору
-			taskHandler.GetTask(w, r, "/todos/")
+			taskHandler.GetTask(w, r)
 		case http.MethodPut:
 			// PUT Обновить задачу по идентификатору
 			taskHandler.UpdateTask(w, r)

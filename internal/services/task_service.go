@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/SANEKNAYMCHIK/task-manager/internal/models"
@@ -38,8 +39,16 @@ func (s *TaskService) Delete() {
 	return
 }
 
-func (s *TaskService) Get() {
-	return
+func (s *TaskService) Get(id int) (*models.Task, error) {
+	val, ok := s.data.Load(id)
+	if !ok {
+		return nil, fmt.Errorf("Not found")
+	}
+	task, ok := val.(*models.Task)
+	if !ok {
+		return nil, fmt.Errorf("Invalid task data")
+	}
+	return task, nil
 }
 
 func (s *TaskService) List() {

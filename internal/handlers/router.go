@@ -23,11 +23,11 @@ func NewRouter(taskService *services.TaskService) *http.ServeMux {
 		}
 	})
 
-	mux.HandleFunc("/todos/{id}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/todos/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			// GET Получить задачу по идентификатору
-			taskHandler.GetTask(w, r)
+			taskHandler.GetTask(w, r, "/todos/")
 		case http.MethodPut:
 			// PUT Обновить задачу по идентификатору
 			taskHandler.UpdateTask(w, r)

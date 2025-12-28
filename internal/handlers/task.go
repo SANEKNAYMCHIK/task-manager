@@ -96,8 +96,6 @@ func (t *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func getID(path string) (int, error) {

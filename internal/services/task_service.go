@@ -1,9 +1,9 @@
 package services
 
 import (
-	"fmt"
 	"sync"
 
+	customerrors "github.com/SANEKNAYMCHIK/task-manager/internal/custom_errors"
 	"github.com/SANEKNAYMCHIK/task-manager/internal/models"
 )
 
@@ -20,6 +20,9 @@ func NewTaskService(data *sync.Map) *TaskService {
 }
 
 func (s *TaskService) Create(reqTask models.TaskRequest) (*models.Task, error) {
+	if reqTask.Title == "" {
+		return nil, customerrors.ErrTitleIsRequired
+	}
 	var tempDescr string
 	if reqTask.Description != nil {
 		tempDescr = *reqTask.Description
@@ -40,9 +43,12 @@ func (s *TaskService) Create(reqTask models.TaskRequest) (*models.Task, error) {
 }
 
 func (s *TaskService) Update(id int, reqTask models.TaskRequest) (*models.Task, error) {
+	if reqTask.Title == "" {
+		return nil, customerrors.ErrTitleIsRequired
+	}
 	curData, ok := s.data.Load(id)
 	if !ok {
-		return nil, fmt.Errorf("Not found")
+		return nil, customerrors.ErrTaskNotFound
 	}
 	tempDescr := curData.(*models.Task).Description
 	if reqTask.Description != nil {
@@ -65,7 +71,7 @@ func (s *TaskService) Update(id int, reqTask models.TaskRequest) (*models.Task, 
 func (s *TaskService) Delete(id int) error {
 	_, ok := s.data.Load(id)
 	if !ok {
-		return fmt.Errorf("Not Found")
+		return customerrors.ErrTaskNotFound
 	}
 	s.data.Delete(id)
 	return nil
@@ -74,11 +80,11 @@ func (s *TaskService) Delete(id int) error {
 func (s *TaskService) Get(id int) (*models.Task, error) {
 	val, ok := s.data.Load(id)
 	if !ok {
-		return nil, fmt.Errorf("Not found")
+		return nil, customerrors.ErrTaskNotFound
 	}
 	task, ok := val.(*models.Task)
 	if !ok {
-		return nil, fmt.Errorf("Invalid task data")
+		return nil, customerrors.ErrInvalidData
 	}
 	return task, nil
 }

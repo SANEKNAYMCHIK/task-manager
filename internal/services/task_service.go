@@ -41,7 +41,6 @@ func (s *TaskService) Create(reqTask models.TaskRequest) (*models.Task, error) {
 		IsDone:      tempIsDone,
 	}
 	s.data.Store(int(id), resp)
-	s.curID++
 	return resp, nil
 }
 

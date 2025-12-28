@@ -2,6 +2,7 @@ package services
 
 import (
 	"sync"
+	"sync/atomic"
 
 	customerrors "github.com/SANEKNAYMCHIK/task-manager/internal/custom_errors"
 	"github.com/SANEKNAYMCHIK/task-manager/internal/models"
@@ -9,13 +10,13 @@ import (
 
 type TaskService struct {
 	data  *sync.Map
-	curID int
+	curID int64
 }
 
 func NewTaskService(data *sync.Map) *TaskService {
 	return &TaskService{
 		data:  data,
-		curID: 1,
+		curID: 0,
 	}
 }
 
@@ -31,13 +32,15 @@ func (s *TaskService) Create(reqTask models.TaskRequest) (*models.Task, error) {
 	if reqTask.IsDone != nil {
 		tempIsDone = *reqTask.IsDone
 	}
+
+	id := atomic.AddInt64(&s.curID, 1)
 	resp := &models.Task{
-		ID:          s.curID,
+		ID:          int(id),
 		Title:       reqTask.Title,
 		Description: tempDescr,
 		IsDone:      tempIsDone,
 	}
-	s.data.Store(s.curID, resp)
+	s.data.Store(int(id), resp)
 	s.curID++
 	return resp, nil
 }

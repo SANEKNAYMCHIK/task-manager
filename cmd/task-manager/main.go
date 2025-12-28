@@ -18,10 +18,10 @@ func main() {
 	serverPort := ":8080"
 	data := &sync.Map{}
 	taskService := services.NewTaskService(data)
-	mux := handlers.NewRouter(taskService)
+	handler := handlers.NewRouter(taskService)
 	httpServer := &http.Server{
 		Addr:    serverPort,
-		Handler: mux,
+		Handler: handler,
 	}
 
 	stop := make(chan os.Signal, 1)

@@ -6,7 +6,7 @@ import (
 	"github.com/SANEKNAYMCHIK/task-manager/internal/services"
 )
 
-func NewRouter(taskService *services.TaskService) *http.ServeMux {
+func NewRouter(taskService *services.TaskService) http.Handler {
 	mux := http.NewServeMux()
 	taskHandler := NewTaskHandler(taskService)
 
@@ -37,5 +37,5 @@ func NewRouter(taskService *services.TaskService) *http.ServeMux {
 		}
 	})
 
-	return mux
+	return LoggingMiddleware(mux)
 }
